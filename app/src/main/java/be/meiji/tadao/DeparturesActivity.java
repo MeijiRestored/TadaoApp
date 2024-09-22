@@ -3,10 +3,11 @@ package be.meiji.tadao;
 import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,6 +15,8 @@ import androidx.core.content.ContextCompat;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -29,8 +32,11 @@ import org.json.JSONObject;
 
 public class DeparturesActivity extends AppCompatActivity {
 
-  private LinearLayout departuresContainer;
+  private static final int UPDATE_INTERVAL = 60000; // 60 seconds
+  private Handler handler;
+  private Runnable updateRunnable;
   private OkHttpClient client;
+  private ViewGroup departuresContainer;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +54,28 @@ public class DeparturesActivity extends AppCompatActivity {
     Intent intent = getIntent();
     int stopId = intent.getIntExtra("stopId", -1);
 
-    fetchNextDepartures(stopId);
+    handler = new Handler();
+
+    // Define the task to be repeated
+    updateRunnable = new Runnable() {
+      @Override
+      public void run() {
+        fetchNextDepartures(stopId);
+
+        handler.postDelayed(this, UPDATE_INTERVAL);
+      }
+    };
+
+    handler.post(updateRunnable);
+  }
+
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+
+    if (handler != null) {
+      handler.removeCallbacks(updateRunnable);
+    }
   }
 
   private void fetchNextDepartures(int stopId) {
@@ -71,6 +98,7 @@ public class DeparturesActivity extends AppCompatActivity {
           String jsonResponse = response.body().string();
           runOnUiThread(() -> {
             try {
+              departuresContainer.removeAllViews();
               parseDeparturesData(jsonResponse);
             } catch (JSONException e) {
               Log.e("JSON_ERROR", "Failed to parse JSON", e);
@@ -171,13 +199,18 @@ public class DeparturesActivity extends AppCompatActivity {
 
   private void displayDepartures(List<Departure> departuresList) {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-    LocalDateTime now = LocalDateTime.now();
+
+    ZoneId parisZone = ZoneId.of("Europe/Paris");
+    ZonedDateTime now = ZonedDateTime.now(parisZone);
 
     for (Departure departure : departuresList) {
-      LocalDateTime scheduledTime = LocalDateTime.parse(departure.getDateTime(), formatter);
-      LocalDateTime realTime =
-          departure.getRealDateTime() != null ? LocalDateTime.parse(departure.getRealDateTime(),
-              formatter) : scheduledTime;
+      ZonedDateTime scheduledTime = LocalDateTime
+          .parse(departure.getDateTime(), formatter)
+          .atZone(parisZone);
+
+      ZonedDateTime realTime = departure.getRealDateTime() != null ?
+          LocalDateTime.parse(departure.getRealDateTime(), formatter).atZone(parisZone) :
+          scheduledTime;
 
       long waitTime = Duration.between(now, realTime).toMinutes();
 
