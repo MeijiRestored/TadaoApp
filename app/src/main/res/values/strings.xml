@@ -1,0 +1,16 @@
+<resources>
+  <string name="app_name">Tadao</string>
+  <string name="search_label">Rechercher un arrêt…</string>
+  <string name="search">Rechercher</string>
+  <string name="bus_stop_name">Nom de l\'arrêt</string>
+  <string name="postcode_city">Code postal - Ville</string>
+  <string name="no_next_departures">Pas de prochains départs</string>
+  <string name="line">Ligne</string>
+  <string name="to">"vers"</string>
+  <string name="in">dans</string>
+  <string name="time">\?? min</string>
+  <string name="delay">en retard de</string>
+  <string name="early">en avance de</string>
+  <string name="on_time">à l\'heure</string>
+  <string name="planned">prévu</string>
+</resources>

@@ -1,0 +1,31 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+android {
+    namespace 'be.meiji.tadao'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "be.meiji.tadao"
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName "0.1"
+
+        vectorDrawables {
+            useSupportLibrary true
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation libs.androidx.recyclerview
+    implementation libs.okhttp
+    implementation libs.androidx.appcompat
+}
