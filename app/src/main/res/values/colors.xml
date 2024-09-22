@@ -7,4 +7,8 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="colorDelay">#fc9803</color>
+    <color name="colorEarly">#defa07</color>
+    <color name="colorOnTime">#dedede</color>
+    <color name="colorPlanned">#b1b1b1</color>
 </resources>

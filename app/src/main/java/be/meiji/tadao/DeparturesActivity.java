@@ -1,7 +1,6 @@
 package be.meiji.tadao;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -194,7 +194,6 @@ public class DeparturesActivity extends AppCompatActivity {
       GradientDrawable background = (GradientDrawable) lineNumberView.getBackground();
       background.setColor(android.graphics.Color.parseColor("#" + departure.getLineColor()));
 
-
       TextView directionView = departureView.findViewById(R.id.text_direction);
       directionView.setText(departure.getDirectionName());
 
@@ -210,18 +209,22 @@ public class DeparturesActivity extends AppCompatActivity {
       if (delay != 0) {
         if (delay > 0) {
           delayType = getString(R.string.delay);
-          delayTypeView.setTextColor(Color.parseColor("#fc9803"));
+          delayTypeView.setTextColor(ContextCompat.getColor(this, R.color.colorDelay));
+          delayView.setTextColor(ContextCompat.getColor(this, R.color.colorDelay));
         } else {
           delayType = getString(R.string.early);
-          delayTypeView.setTextColor(Color.parseColor("#defa07"));
+          delayTypeView.setTextColor(ContextCompat.getColor(this, R.color.colorEarly));
+          delayView.setTextColor(ContextCompat.getColor(this, R.color.colorEarly));
         }
       } else {
         if (departure.isRealTime()) {
           delayType = getString(R.string.on_time);
-          delayTypeView.setTextColor(Color.parseColor("#dedede"));
+          delayTypeView.setTextColor(ContextCompat.getColor(this, R.color.colorOnTime));
+          delayView.setTextColor(ContextCompat.getColor(this, R.color.colorOnTime));
         } else {
           delayType = getString(R.string.planned);
-          delayTypeView.setTextColor(Color.parseColor("#b1b1b1"));
+          delayTypeView.setTextColor(ContextCompat.getColor(this, R.color.colorPlanned));
+          delayView.setTextColor(ContextCompat.getColor(this, R.color.colorPlanned));
         }
       }
 
