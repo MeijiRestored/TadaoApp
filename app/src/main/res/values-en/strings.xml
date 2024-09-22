@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">Tadao</string>
+  <string name="search_label">Search for a stop...</string>
+  <string name="search">Search</string>
+  <string name="bus_stop_name">Name of the stop</string>
+  <string name="postcode_city">Postcode - City</string>
+  <string name="no_next_departures">No next departures</string>
+  <string name="line">Line</string>
+  <string name="to">to</string>
+  <string name="in">in</string>
+  <string name="time">\?? min</string>
+  <string name="delay">is late by</string>
+  <string name="early">is early by</string>
+  <string name="on_time">is on time</string>
+  <string name="planned">is scheduled</string>
+</resources>
