@@ -94,8 +94,10 @@ public class MainActivity extends AppCompatActivity implements
         String postalCode = jsonObject.getString("PostalCode");
         String cityName = jsonObject.getString("CityName");
 
-        BusStop busStop = new BusStop(id, name, postalCode, cityName);
-        busStopList.add(busStop);
+        if (postalCode.startsWith("62") || postalCode.startsWith("59")) {
+          BusStop busStop = new BusStop(id, name, postalCode, cityName);
+          busStopList.add(busStop);
+        }
       }
 
       // Notify the RecyclerView to update the list

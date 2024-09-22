@@ -14,6 +14,7 @@ A simple Java Android application to view next departures for stops of the [Tada
 
 - Search bus stop by name and/or city
 - Next departures in real-time (if data available)
+- Auto updating list of departures
 
 ## Download
 
