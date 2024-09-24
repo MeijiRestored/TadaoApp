@@ -11,15 +11,17 @@ public class Departure {
       "yyyy-MM-dd'T'HH:mm:ss");
   private String lineNumber;
   private String directionName;
+  private String destinationName;
   private String lineColor;
   private String dateTime;
   private String realDateTime;
   private boolean isRealTime;
 
-  public Departure(String lineNumber, String directionName, String lineColor, String dateTime,
+  public Departure(String lineNumber, String directionName, String destinationName, String lineColor, String dateTime,
       String realDateTime) {
     this.lineNumber = lineNumber;
     this.directionName = directionName;
+    this.destinationName = destinationName;
     this.lineColor = lineColor;
     this.dateTime = dateTime;
     this.isRealTime = !realDateTime.equals("null");
@@ -33,6 +35,10 @@ public class Departure {
 
   public String getDirectionName() {
     return directionName;
+  }
+
+  public String getDestinationName() {
+    return destinationName;
   }
 
   public String getLineColor() {

@@ -34,7 +34,7 @@ public class BusStopAdapter extends RecyclerView.Adapter<BusStopAdapter.BusStopV
     holder.postcodeCityTextView.setText(busStop.getPostalCode() + ", " + busStop.getCityName());
 
     // Set click listener for each bus stop item
-    holder.itemView.setOnClickListener(v -> listener.onBusStopClick(busStop.getId(), busStop.getName()));
+    holder.itemView.setOnClickListener(v -> listener.onBusStopClick(busStop.getId(), busStop.getName(), busStop.getCityName()));
   }
 
   @Override
@@ -45,7 +45,7 @@ public class BusStopAdapter extends RecyclerView.Adapter<BusStopAdapter.BusStopV
   // Define an interface for the click event
   public interface OnBusStopClickListener {
 
-    void onBusStopClick(int stopId, String stopName);
+    void onBusStopClick(int stopId, String stopName, String cityName);
   }
 
   public static class BusStopViewHolder extends RecyclerView.ViewHolder {

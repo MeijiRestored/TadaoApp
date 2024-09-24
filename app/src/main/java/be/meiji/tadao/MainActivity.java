@@ -110,10 +110,11 @@ public class MainActivity extends AppCompatActivity implements
 
   // This method is triggered when a bus stop is clicked
   @Override
-  public void onBusStopClick(int stopId, String stopName) {
+  public void onBusStopClick(int stopId, String stopName, String cityName) {
     Intent intent = new Intent(MainActivity.this, DeparturesActivity.class);
     intent.putExtra("stopId", stopId);
     intent.putExtra("stopName", stopName);
+    intent.putExtra("cityName", cityName);
     startActivity(intent);
   }
 }

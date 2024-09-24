@@ -43,8 +43,11 @@ public class DeparturesActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_departures);
     String stopName = getIntent().getStringExtra("stopName");
+    String cityName = getIntent().getStringExtra("cityName");
 
-    if (stopName != null) {
+    if (stopName != null && cityName != null) {
+      setTitle(String.format("%s - %s", cityName, stopName));
+    } else if (stopName != null) {
       setTitle(stopName);
     }
 
@@ -141,8 +144,10 @@ public class DeparturesActivity extends AppCompatActivity {
 
           String dateTime = timeObj.getString("dateTime");
           String realDateTime = timeObj.optString("realDateTime", "null");
+          String destinationName = timeObj.getJSONObject("destination").getString("name");
 
-          Departure departure = new Departure(lineNumber, directionName, lineColor, dateTime,
+          Departure departure = new Departure(lineNumber, directionName, destinationName, lineColor,
+              dateTime,
               realDateTime);
           departuresList.add(departure);
         }
@@ -228,7 +233,10 @@ public class DeparturesActivity extends AppCompatActivity {
       background.setColor(android.graphics.Color.parseColor("#" + departure.getLineColor()));
 
       TextView directionView = departureView.findViewById(R.id.text_direction);
-      directionView.setText(departure.getDirectionName());
+      directionView.setText(String.format("Sens %s", departure.getDirectionName()));
+
+      TextView destinationView = departureView.findViewById(R.id.text_dir);
+      destinationView.setText(departure.getDestinationName());
 
       TextView waitTimeView = departureView.findViewById(R.id.text_wait_time);
       waitTimeView.setText(waitTimeText);
