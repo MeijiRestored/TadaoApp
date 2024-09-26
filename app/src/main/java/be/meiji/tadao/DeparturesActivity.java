@@ -1,9 +1,11 @@
 package be.meiji.tadao;
 
+import static be.meiji.tadao.DestinationFormatter.formatDestination;
+import static be.meiji.tadao.DestinationFormatter.formatLineNumber;
+
 import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +23,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -33,8 +38,7 @@ import org.json.JSONObject;
 public class DeparturesActivity extends AppCompatActivity {
 
   private static final int UPDATE_INTERVAL = 60000; // 60 seconds
-  private Handler handler;
-  private Runnable updateRunnable;
+  private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
   private OkHttpClient client;
   private ViewGroup departuresContainer;
 
@@ -57,28 +61,21 @@ public class DeparturesActivity extends AppCompatActivity {
     Intent intent = getIntent();
     int stopId = intent.getIntExtra("stopId", -1);
 
-    handler = new Handler();
-
-    // Define the task to be repeated
-    updateRunnable = new Runnable() {
-      @Override
-      public void run() {
-        fetchNextDepartures(stopId);
-
-        handler.postDelayed(this, UPDATE_INTERVAL);
-      }
-    };
-
-    handler.post(updateRunnable);
+    startAutoRefresh(stopId);
   }
 
   @Override
   protected void onDestroy() {
     super.onDestroy();
 
-    if (handler != null) {
-      handler.removeCallbacks(updateRunnable);
+    if (scheduler != null) {
+      scheduler.shutdown();
     }
+  }
+
+  protected void startAutoRefresh(int stopId) {
+    scheduler.scheduleWithFixedDelay(() -> fetchNextDepartures(stopId), 0, UPDATE_INTERVAL,
+        TimeUnit.MILLISECONDS);
   }
 
   private void fetchNextDepartures(int stopId) {
@@ -169,39 +166,6 @@ public class DeparturesActivity extends AppCompatActivity {
     departuresContainer.addView(noDeparturesTextView);
   }
 
-  private String formatLineNumber(String lineNumber) {
-    int lineNum;
-
-    try {
-      lineNum = Integer.parseInt(lineNumber);
-    } catch (NumberFormatException e) {
-      return lineNumber;
-    }
-
-    switch (lineNum) {
-      case 1:
-      case 2:
-      case 3:
-      case 4:
-      case 5:
-      case 6:
-      case 7:
-        return "B" + lineNum;
-      case 180:
-        return "18 Express";
-      case 90:
-        return "Nav Béthune";
-      case 91:
-        return "Nav Lens";
-      case 92:
-        return "Nav Bruay";
-      case 93:
-        return "Nav Vimy";
-      default:
-        return lineNumber;
-    }
-  }
-
   private void displayDepartures(List<Departure> departuresList) {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -236,7 +200,8 @@ public class DeparturesActivity extends AppCompatActivity {
       directionView.setText(String.format("Sens %s", departure.getDirectionName()));
 
       TextView destinationView = departureView.findViewById(R.id.text_dir);
-      destinationView.setText(departure.getDestinationName());
+      destinationView.setText(
+          formatDestination(departure.getDestinationName(), departure.getDirectionName()));
 
       TextView waitTimeView = departureView.findViewById(R.id.text_wait_time);
       waitTimeView.setText(waitTimeText);

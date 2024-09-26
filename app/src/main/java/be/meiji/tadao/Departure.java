@@ -22,7 +22,7 @@ public class Departure {
     this.lineNumber = lineNumber;
     this.directionName = directionName;
     this.destinationName = destinationName;
-    this.lineColor = lineColor;
+    this.lineColor = lineColor.equals("null") ? "000000" : lineColor;
     this.dateTime = dateTime;
     this.isRealTime = !realDateTime.equals("null");
     this.realDateTime =
