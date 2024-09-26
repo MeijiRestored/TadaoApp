@@ -28,4 +28,5 @@ dependencies {
     implementation libs.androidx.recyclerview
     implementation libs.okhttp
     implementation libs.androidx.appcompat
+    implementation libs.google.flexbox
 }

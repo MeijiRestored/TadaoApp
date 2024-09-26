@@ -15,4 +15,6 @@
   <string name="on_time">is on time</string>
   <string name="planned">is scheduled</string>
   <string name="dir">Direction</string>
+  <string name="city">City</string>
+  <string name="lines_here">Lines here:</string>
 </resources>

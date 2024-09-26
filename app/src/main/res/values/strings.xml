@@ -14,4 +14,6 @@
   <string name="on_time">à l\'heure</string>
   <string name="planned">prévu</string>
   <string name="dir">Direction</string>
+  <string name="city">Ville</string>
+  <string name="lines_here">Lignes à cet arrêt :</string>
 </resources>

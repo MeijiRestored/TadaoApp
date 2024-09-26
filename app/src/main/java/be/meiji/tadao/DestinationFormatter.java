@@ -30,6 +30,15 @@ public class DestinationFormatter {
   private static String handleSpecialCases(String destination, String direction) {
     Map<String, Function<String, String>> specialCases = getSpecialCases();
 
+    if (destination.startsWith("LENS - Gares") && direction.contains(" / ")) {
+      int x = direction.split(" / ")[0].contains("Gares - Quai") ? 0 : 1;
+      String quai = direction.split(" / ")[x].split(" - ")[1];
+      return String.format("LENS - Gares - %s", quai);
+    }
+    if (destination.startsWith("LENS - Gares")) {
+      String quai = direction.split(" - ")[1];
+      return String.format("BRUAY - Europe - %s", quai);
+    }
     if (destination.startsWith("BRUAY-LA") && direction.startsWith("Europe")) {
       String quai = direction.substring(direction.length() - 1);
       return String.format("BRUAY - Europe - Quai %s", quai);
@@ -92,6 +101,12 @@ public class DestinationFormatter {
     if (destination.startsWith("NORRENT") && direction.startsWith("Mairie / Fonte")) {
       return "NORRENT-FONTES - Fontes";
     }
+    if (destination.startsWith("COURRIERES - Cen")) {
+      return "COURRIÈRES - Centre Culturel";
+    }
+    if (destination.startsWith("HENIN-BEA") && direction.startsWith("Buisse / Cen")) {
+      return "HÉNIN-BEAUMONT - Buisse";
+    }
 
     for (Map.Entry<String, Function<String, String>> entry : specialCases.entrySet()) {
       if (destination.startsWith(entry.getKey())) {
@@ -106,13 +121,8 @@ public class DestinationFormatter {
     Map<String, Function<String, String>> specialCases = new HashMap<>();
 
     specialCases.put("LENS - Béhal", dir -> {
-      String quai = dir.split(" / ")[0].substring(dir.split(" / ")[0].length() - 1);
+      String quai = dir.substring(dir.length() - 1);
       return String.format("LENS - Béhal-Jean Zay - Quai %s", quai);
-    });
-
-    specialCases.put("LENS - Gares", dir -> {
-      String quai = dir.split(" / ")[0].split(" - ")[1];
-      return String.format("LENS - Gares - %s", quai);
     });
 
     specialCases.put("BETHUNE - Gare", dir -> {
@@ -143,7 +153,8 @@ public class DestinationFormatter {
         "NOYELLES-LES-V", "VENDIN-LE-V", "LA BASSEE", "DIEVAL",
         "ELEU-DIT-L", "CALONNE-S", "HENIN-B", "ESTREE-C",
         "BILLY-BER", "BETHUNE", "ABLAIN-S", "PONT-A-V",
-        "REBREUVE-", "FRESNICOURT-", "ESTREE-BL", "NORRENT-F"
+        "REBREUVE-", "FRESNICOURT-", "ESTREE-BL", "NORRENT-F", "GIVENCHY-EN",
+        "GIVENCHY-LES", "COURRIERES"
     );
 
     for (String prefix : cityPrefixes) {
@@ -197,6 +208,12 @@ public class DestinationFormatter {
         return "ESTRÉE-BLANCHE";
       case "NORRENT-F":
         return "NORRENT-FONTES";
+      case "GIVENCHY-EN":
+        return "GIVENCHY-EN-GOHELLE";
+      case "GIVENCHY-LES":
+        return "GIVENCHY-LÈS-LA-BASSÉE";
+      case "COURRIERES":
+        return "COURRIÈRES";
 
       default:
         return cityPrefix.replace("-", " ");

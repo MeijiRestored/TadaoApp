@@ -4,12 +4,18 @@ import static be.meiji.tadao.DestinationFormatter.formatDestination;
 import static be.meiji.tadao.DestinationFormatter.formatLineNumber;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import com.google.android.flexbox.FlexboxLayout;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,8 +27,11 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -41,26 +50,26 @@ public class DeparturesActivity extends AppCompatActivity {
   private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
   private OkHttpClient client;
   private ViewGroup departuresContainer;
+  private ViewGroup infoContainer;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_departures);
-    String stopName = getIntent().getStringExtra("stopName");
-    String cityName = getIntent().getStringExtra("cityName");
 
-    if (stopName != null && cityName != null) {
-      setTitle(String.format("%s - %s", cityName, stopName));
-    } else if (stopName != null) {
-      setTitle(stopName);
+    if (getSupportActionBar() != null) {
+      getSupportActionBar().hide();
     }
 
+    setContentView(R.layout.activity_departures);
+
     departuresContainer = findViewById(R.id.departures_container);
+    infoContainer = findViewById(R.id.info_container);
     client = new OkHttpClient();
 
     Intent intent = getIntent();
     int stopId = intent.getIntExtra("stopId", -1);
 
+    getStopInfo(stopId, intent);
     startAutoRefresh(stopId);
   }
 
@@ -73,6 +82,124 @@ public class DeparturesActivity extends AppCompatActivity {
     }
   }
 
+  private void getStopInfo(int stopId, Intent intent) {
+    String url =
+        "https://api.maas-fr.cityway.fr/media/api/fr/Lines/ByLogicalStop?logicalId=" + stopId;
+
+    Request request = new Request.Builder()
+        .url(url)
+        .build();
+
+    client.newCall(request).enqueue(new Callback() {
+      @Override
+      public void onFailure(@NonNull Call call, @NonNull IOException e) {
+        Log.e(MainActivity.API_ERROR, "Request Failed", e);
+      }
+
+      @Override
+      public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+        if (response.isSuccessful()) {
+          String jsonResponse = response.body().string();
+          runOnUiThread(() -> {
+            try {
+              infoContainer.removeAllViews();
+              parseInfo(jsonResponse, intent);
+            } catch (JSONException e) {
+              Log.e("JSON_ERROR", "Failed to parse JSON", e);
+            }
+          });
+        } else {
+          Log.e(MainActivity.API_ERROR, "Response not successful: " + response.code());
+        }
+      }
+    });
+  }
+
+  private void parseInfo(String jsonResponse, Intent intent) throws JSONException {
+    List<Map<String, String>> resultList = new ArrayList<>();
+    Map<String, String> uniqueLines = new HashMap<>();
+
+    JSONArray transportModes = new JSONArray(jsonResponse);
+
+    for (int i = 0; i < transportModes.length(); i++) {
+      JSONObject transportMode = transportModes.getJSONObject(i);
+      JSONArray lines = transportMode.getJSONArray("Lines");
+
+      for (int j = 0; j < lines.length(); j++) {
+        JSONObject line = lines.getJSONObject(j);
+        String lineNumber = line.getString("Number");
+        String lineColor = line.getString("Color");
+
+        if (!uniqueLines.containsKey(lineNumber)) {
+          uniqueLines.put(lineNumber, lineColor);
+        }
+      }
+    }
+
+    for (Map.Entry<String, String> entry : uniqueLines.entrySet()) {
+      Map<String, String> lineInfo = new HashMap<>();
+      lineInfo.put("Number", entry.getKey());
+      lineInfo.put("Color", entry.getValue());
+      resultList.add(lineInfo);
+    }
+
+    resultList.sort((line1, line2) -> {
+      // Convert the "Number" values to integers and compare them
+      int num1 = Integer.parseInt(line1.get("Number"));
+      int num2 = Integer.parseInt(line2.get("Number"));
+      return Integer.compare(num1, num2);
+    });
+
+    showInfo(resultList, intent);
+  }
+
+  private void showInfo(List<Map<String, String>> lines, Intent intent) {
+    View infoView = LayoutInflater.from(this)
+        .inflate(R.layout.item_info, infoContainer, false);
+
+    TextView stopNameView = infoView.findViewById(R.id.info_stop_name);
+    TextView cityNameView = infoView.findViewById(R.id.info_city_name);
+    stopNameView.setText(intent.getStringExtra("stopName"));
+    cityNameView.setText(intent.getStringExtra("cityName"));
+
+    FlexboxLayout linesContainer = infoView.findViewById(R.id.lines_container);
+
+    for (Map<String, String> line : lines) {
+      TextView lineTextView = new TextView(this);
+
+      String modifiedLineNumber = formatLineNumber(line.get("Number"));
+
+      lineTextView.setText(modifiedLineNumber);
+
+      lineTextView.setTextColor(Color.parseColor("#FFFFFF"));
+
+      lineTextView.setTextSize(18);
+      lineTextView.setPadding(12, 4, 12, 4);
+      lineTextView.setTypeface(null, Typeface.BOLD);
+
+      LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+          LayoutParams.WRAP_CONTENT, // Width
+          LayoutParams.WRAP_CONTENT  // Height
+      );
+
+      params.setMargins(16, 0, 0, 16);
+      lineTextView.setLayoutParams(params);
+
+      lineTextView.setBackgroundResource(R.drawable.rounded_background);
+      GradientDrawable linebackground = (GradientDrawable) lineTextView.getBackground();
+      linebackground.setColor(android.graphics.Color.parseColor((modifiedLineNumber.length() == 4 && modifiedLineNumber.matches("\\d{4}")) ? "#EBC426" : "#" + line.get("Color")));
+
+      if (modifiedLineNumber.length() == 4 && modifiedLineNumber.matches("\\d{4}")) {
+        lineTextView.setTextColor(Color.parseColor("#000000"));
+      }
+
+      linesContainer.addView(lineTextView);
+    }
+
+    infoContainer.addView(infoView);
+  }
+
+
   protected void startAutoRefresh(int stopId) {
     scheduler.scheduleWithFixedDelay(() -> fetchNextDepartures(stopId), 0, UPDATE_INTERVAL,
         TimeUnit.MILLISECONDS);
@@ -80,7 +207,7 @@ public class DeparturesActivity extends AppCompatActivity {
 
   private void fetchNextDepartures(int stopId) {
     String url = "https://api.maas-fr.cityway.fr/media/api/v1/fr/Schedules/LogicalStop/" + stopId
-        + "/NextDeparture?realTime=true&userId=TWL_TADAO2_6PW21JM";
+        + "/NextDeparture?realTime=true";
 
     Request request = new Request.Builder()
         .url(url)
@@ -194,7 +321,8 @@ public class DeparturesActivity extends AppCompatActivity {
       lineNumberView.setText(modifiedLineNumber);
 
       GradientDrawable background = (GradientDrawable) lineNumberView.getBackground();
-      background.setColor(android.graphics.Color.parseColor("#" + departure.getLineColor()));
+      String col = (modifiedLineNumber.length() == 4 && modifiedLineNumber.matches("\\d{4}")) ? "#EBC426" : "#" + departure.getLineColor();
+      background.setColor(android.graphics.Color.parseColor(col));
 
       TextView directionView = departureView.findViewById(R.id.text_direction);
       directionView.setText(String.format("Sens %s", departure.getDirectionName()));
@@ -208,6 +336,10 @@ public class DeparturesActivity extends AppCompatActivity {
 
       TextView delayTypeView = departureView.findViewById(R.id.text_delay_type);
       TextView delayView = departureView.findViewById(R.id.text_delay);
+
+      if (modifiedLineNumber.length() == 4 && modifiedLineNumber.matches("\\d{4}")) {
+        lineNumberView.setTextColor(Color.parseColor("#000000"));
+      }
 
       long delay = Duration.between(scheduledTime, realTime).toMinutes();
       String delayText = delay != 0 ? formatWaitTime(delay) : "";
