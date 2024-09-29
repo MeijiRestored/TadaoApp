@@ -37,7 +37,7 @@ public class DestinationFormatter {
     }
     if (destination.startsWith("LENS - Gares")) {
       String quai = direction.split(" - ")[1];
-      return String.format("BRUAY - Europe - %s", quai);
+      return String.format("LENS - Gares - %s", quai);
     }
     if (destination.startsWith("BRUAY-LA") && direction.startsWith("Europe")) {
       String quai = direction.substring(direction.length() - 1);
@@ -106,6 +106,24 @@ public class DestinationFormatter {
     }
     if (destination.startsWith("HENIN-BEA") && direction.startsWith("Buisse / Cen")) {
       return "HÉNIN-BEAUMONT - Buisse";
+    }
+    if (destination.startsWith("LENS - Cité") && direction.startsWith("La Fontaine")) {
+      return "LENS - Cité des Oiseaux";
+    }
+    if (destination.startsWith("LENS - Moza")) {
+      return "LENS - Mozart";
+    }
+    if (destination.startsWith("LENS - La Fo")) {
+      return "LENS - La Fontaine";
+    }
+    if (destination.startsWith("LENS - Trib")) {
+      return "LENS - Tribunal d'Instance";
+    }
+    if (destination.startsWith("LENS - Canti")) {
+      return "LENS - Cantin Salengro";
+    }
+    if (destination.startsWith("LENS - Robes")) {
+      return "LENS - Robespierre";
     }
 
     for (Map.Entry<String, Function<String, String>> entry : specialCases.entrySet()) {
