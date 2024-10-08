@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements
       for (int i = 0; i < jsonArray.length(); i++) {
         JSONObject jsonObject = jsonArray.getJSONObject(i);
 
-        int id = jsonObject.getInt("Id");
+        String id = jsonObject.getString("Id");
         String name = jsonObject.getString("Name");
         String postalCode = jsonObject.getString("PostalCode");
         String cityName = jsonObject.getString("CityName");

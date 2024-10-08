@@ -1,5 +1,6 @@
 package be.meiji.tadao;
 
+import android.util.Log;
 import androidx.annotation.NonNull;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,7 +13,22 @@ public class DestinationFormatter {
   private DestinationFormatter() {
   }
 
-  public static String formatDestination(String destination, String direction) {
+  public static String formatDestination(String destination, String dir) {
+    String direction;
+    String[] spl = dir.split(" - ");
+    if (spl[0].matches("[A-Z\\- ]+") && spl.length >= 2) {
+      StringBuilder result = new StringBuilder();
+      for (int i = 1; i < spl.length; i++) {
+        result.append(spl[i]);
+        if (i < spl.length - 1) {
+          result.append(" - ");
+        }
+      }
+      direction = result.toString();
+    } else {
+      direction = dir;
+    }
+
     String specialFormat = handleSpecialCases(destination, direction);
     if (specialFormat != null) {
       return specialFormat;
@@ -124,6 +140,12 @@ public class DestinationFormatter {
     }
     if (destination.startsWith("LENS - Robes")) {
       return "LENS - Robespierre";
+    }
+    if (destination.startsWith("AUCHY-LES-M") && direction.startsWith("Flandre")) {
+      return "AUCHY-LES-MINES - Flandres";
+    }
+    if (destination.startsWith("LA BASSEE") && direction.startsWith("Flandre")) {
+      return "LA BASSÉE - Gare";
     }
 
     for (Map.Entry<String, Function<String, String>> entry : specialCases.entrySet()) {
@@ -244,6 +266,9 @@ public class DestinationFormatter {
     try {
       lineNum = Integer.parseInt(lineNumber);
     } catch (NumberFormatException e) {
+      if (lineNumber.startsWith("18 e")) {
+        return "18E";
+      }
       return lineNumber;
     }
 

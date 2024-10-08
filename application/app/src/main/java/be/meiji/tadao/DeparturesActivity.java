@@ -9,8 +9,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
-import com.google.android.flexbox.FlexboxLayout;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +18,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import com.google.android.flexbox.FlexboxLayout;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -27,7 +26,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -145,8 +143,26 @@ public class DeparturesActivity extends AppCompatActivity {
 
     resultList.sort((line1, line2) -> {
       // Convert the "Number" values to integers and compare them
-      int num1 = Integer.parseInt(line1.get("Number"));
-      int num2 = Integer.parseInt(line2.get("Number"));
+      int num1;
+      try {
+        num1 = Integer.parseInt(line1.get("Number"));
+      } catch (NumberFormatException e) {
+        if (line1.get("Number").startsWith("18 e")) {
+          num1 = 180;
+        } else {
+          num1 = -1;
+        }
+      }
+      int num2;
+      try {
+        num2 = Integer.parseInt(line2.get("Number"));
+      } catch (NumberFormatException e) {
+        if (line2.get("Number").startsWith("18 e")) {
+          num2 = 180;
+        } else {
+          num2 = -1;
+        }
+      }
       return Integer.compare(num1, num2);
     });
 
@@ -187,7 +203,9 @@ public class DeparturesActivity extends AppCompatActivity {
 
       lineTextView.setBackgroundResource(R.drawable.rounded_background);
       GradientDrawable linebackground = (GradientDrawable) lineTextView.getBackground();
-      linebackground.setColor(android.graphics.Color.parseColor((modifiedLineNumber.length() == 4 && modifiedLineNumber.matches("\\d{4}")) ? "#EBC426" : "#" + line.get("Color")));
+      linebackground.setColor(android.graphics.Color.parseColor(
+          (modifiedLineNumber.length() == 4 && modifiedLineNumber.matches("\\d{4}")) ? "#EBC426"
+              : "#" + line.get("Color")));
 
       if (modifiedLineNumber.length() == 4 && modifiedLineNumber.matches("\\d{4}")) {
         lineTextView.setTextColor(Color.parseColor("#000000"));
@@ -321,7 +339,9 @@ public class DeparturesActivity extends AppCompatActivity {
       lineNumberView.setText(modifiedLineNumber);
 
       GradientDrawable background = (GradientDrawable) lineNumberView.getBackground();
-      String col = (modifiedLineNumber.length() == 4 && modifiedLineNumber.matches("\\d{4}")) ? "#EBC426" : "#" + departure.getLineColor();
+      String col =
+          (modifiedLineNumber.length() == 4 && modifiedLineNumber.matches("\\d{4}")) ? "#EBC426"
+              : "#" + departure.getLineColor();
       background.setColor(android.graphics.Color.parseColor(col));
 
       TextView directionView = departureView.findViewById(R.id.text_direction);
