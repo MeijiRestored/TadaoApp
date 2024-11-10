@@ -9,6 +9,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +69,12 @@ public class MainActivity extends AppCompatActivity implements
       @Override
       public void onFailure(@NonNull Call call, @NonNull IOException e) {
         Log.e(API_ERROR, "Request Failed", e);
+        runOnUiThread(() -> {
+          Snackbar.make(findViewById(android.R.id.content), "Une erreur de connexion est survenue",
+                  BaseTransientBottomBar.LENGTH_LONG)
+              .setAction("Réessayer", v -> performSearch(searchInput.getText().toString()))
+              .show();
+        });
       }
 
       @Override
@@ -75,7 +83,13 @@ public class MainActivity extends AppCompatActivity implements
           String jsonResponse = response.body().string();
           parseBusStopData(jsonResponse);
         } else {
-          Log.e(API_ERROR, "Response not successful: " + response.code());
+          Log.e(API_ERROR, String.format("Response not successful: %d", response.code()));
+          runOnUiThread(() -> {
+            Snackbar.make(findViewById(android.R.id.content),
+                    String.format("Une erreur est survenue (HTTP %d)", response.code()),
+                    BaseTransientBottomBar.LENGTH_LONG)
+                .show();
+          });
         }
       }
     });
@@ -105,6 +119,11 @@ public class MainActivity extends AppCompatActivity implements
 
     } catch (JSONException e) {
       Log.e("JSON_ERROR", "Failed to parse JSON", e);
+      runOnUiThread(() -> {
+        Snackbar.make(findViewById(android.R.id.content), "Erreur de lecture des données",
+                BaseTransientBottomBar.LENGTH_LONG)
+            .show();
+      });
     }
   }
 
