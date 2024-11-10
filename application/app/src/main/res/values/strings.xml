@@ -16,4 +16,5 @@
   <string name="dir">Direction</string>
   <string name="city">Ville</string>
   <string name="lines_here">Lignes à cet arrêt :</string>
+  <string name="stop">Arrêt</string>
 </resources>

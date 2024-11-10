@@ -280,6 +280,9 @@ public class DeparturesActivity extends AppCompatActivity {
         JSONObject direction = lineObj.getJSONObject("direction");
         String directionName = direction.getString("name");
 
+        JSONObject stop = lineObj.getJSONObject("stop");
+        String stopName = stop.getString("name");
+
         JSONArray timesArray = lineObj.getJSONArray("times");
         for (int k = 0; k < timesArray.length(); k++) {
           JSONObject timeObj = timesArray.getJSONObject(k);
@@ -289,8 +292,7 @@ public class DeparturesActivity extends AppCompatActivity {
           String destinationName = timeObj.getJSONObject("destination").getString("name");
 
           Departure departure = new Departure(lineNumber, directionName, destinationName, lineColor,
-              dateTime,
-              realDateTime);
+              dateTime, realDateTime, stopName);
           departuresList.add(departure);
         }
       }
@@ -345,7 +347,7 @@ public class DeparturesActivity extends AppCompatActivity {
       background.setColor(android.graphics.Color.parseColor(col));
 
       TextView directionView = departureView.findViewById(R.id.text_direction);
-      directionView.setText(String.format("Sens %s", departure.getDirectionName()));
+      directionView.setText(String.format("%s %s", getString(R.string.stop), departure.getStopName()));
 
       TextView destinationView = departureView.findViewById(R.id.text_dir);
       destinationView.setText(
