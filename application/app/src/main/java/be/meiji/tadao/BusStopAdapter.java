@@ -34,7 +34,8 @@ public class BusStopAdapter extends RecyclerView.Adapter<BusStopAdapter.BusStopV
     holder.postcodeCityTextView.setText(busStop.getPostalCode() + ", " + busStop.getCityName());
 
     // Set click listener for each bus stop item
-    holder.itemView.setOnClickListener(v -> listener.onBusStopClick(busStop.getId(), busStop.getName(), busStop.getCityName()));
+    holder.itemView.setOnClickListener(
+        v -> listener.onBusStopClick(busStop.getId(), busStop.getName(), busStop.getCityName()));
   }
 
   @Override

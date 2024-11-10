@@ -347,7 +347,8 @@ public class DeparturesActivity extends AppCompatActivity {
       background.setColor(android.graphics.Color.parseColor(col));
 
       TextView directionView = departureView.findViewById(R.id.text_direction);
-      directionView.setText(String.format("%s %s", getString(R.string.stop), departure.getStopName()));
+      directionView.setText(
+          String.format("%s %s", getString(R.string.stop), departure.getStopName()));
 
       TextView destinationView = departureView.findViewById(R.id.text_dir);
       destinationView.setText(
